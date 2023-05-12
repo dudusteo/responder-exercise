@@ -36,6 +36,9 @@ const externalTestQuestion = {
   ]
 }
 
+// there is low chance that "v4 uuid" will be colliding, but for the test
+// lets say that its really 100% unique otherwise, we will need to write uuid provider in a future to avoid that
+
 describe('question repository', () => {
   const TEST_QUESTIONS_FILE_PATH = 'test-questions.json'
   let questionRepo
@@ -71,14 +74,12 @@ describe('question repository', () => {
   test('should return an empty list', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
-    // there is low chance that "nonExistentId" will be colliding, but for the test
-    // lets say that its really 100% unique otherwise, we will need to write uuid provider
     expect(
       await questionRepo.getQuestionById(externalTestQuestion.id)
     ).toBeFalsy()
   })
 
-  test('should return a list of 3 questions from 2', async () => {
+  test('should add an question increasing the size of questions by 1', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
     await questionRepo.addQuestion(externalTestQuestion)
@@ -88,7 +89,7 @@ describe('question repository', () => {
     )
   })
 
-  test('should return a list of 2 questions from 2 (wrong object / empty)', async () => {
+  test('should not add an question (wrong object / empty)', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
     await questionRepo.addQuestion({})
@@ -106,9 +107,6 @@ describe('question repository', () => {
 
   test('should return an undefined for non existing id', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
-
-    // there is low chance that "nonExistentId" will be colliding, but for the test
-    // lets say that its really 100% unique otherwise, we will need to write uuid provider
 
     expect(await questionRepo.getAnswers(externalTestQuestion.id)).toBeFalsy()
   })
@@ -133,5 +131,28 @@ describe('question repository', () => {
         externalTestQuestion.answers[0].id
       )
     ).toBeFalsy()
+  })
+
+  test('should add an anwer increasing the size of answers by 1', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    await questionRepo.addAnswer(
+      testQuestions[0].id,
+      externalTestQuestion.answers[0]
+    )
+
+    expect(await questionRepo.getAnswers(testQuestions[0].id)).toHaveLength(
+      testQuestions[0].answers.length + 1
+    )
+  })
+
+  test('should not add an answer (wrong object / empty)', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    await questionRepo.addAnswer(testQuestions[0].id, {})
+
+    expect(await questionRepo.getAnswers(testQuestions[0].id)).toHaveLength(
+      testQuestions[0].answers.length
+    )
   })
 })

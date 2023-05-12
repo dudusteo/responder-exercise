@@ -6,6 +6,12 @@ const validateQuestion = question => {
   return expectedKeys.every(key => Object.keys(question).includes(key))
 }
 
+const validateAnswer = answer => {
+  const expectedKeys = ['id', 'author', 'summary']
+
+  return expectedKeys.every(key => Object.keys(answer).includes(key))
+}
+
 const makeQuestionRepository = fileName => {
   const getQuestions = async () => {
     const fileContent = await readFile(fileName, { encoding: 'utf-8' })
@@ -42,7 +48,22 @@ const makeQuestionRepository = fileName => {
 
     return answers ? answers.find(answer => answer.id == answerId) : undefined
   }
-  const addAnswer = async (questionId, answer) => {}
+
+  const addAnswer = async (questionId, answer) => {
+    if (!validateAnswer(answer)) return
+
+    const questions = await getQuestions()
+
+    questions.forEach(question => {
+      if (question.id == questionId) {
+        question.answers.push(answer)
+      }
+    })
+
+    await writeFile(fileName, JSON.stringify(questions))
+
+    return
+  }
 
   return {
     getQuestions,
