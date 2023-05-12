@@ -17,6 +17,13 @@ const testQuestions = [
   }
 ]
 
+const externalTestQuestion = {
+  id: faker.datatype.uuid(),
+  summary: 'Why are you here?',
+  author: 'Deve Loper',
+  answers: []
+}
+
 describe('question repository', () => {
   const TEST_QUESTIONS_FILE_PATH = 'test-questions.json'
   let questionRepo
@@ -52,10 +59,26 @@ describe('question repository', () => {
   test('should return an empty list', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
-    // there is low chance that "nonExistentId" will be colliding
-    // but for the test lets say that its really 100% unique
+    // there is low chance that "nonExistentId" will be colliding, but for the test
+    // lets say that its really 100% unique otherwise, we will need to write uuid provider
     const nonExistentId = faker.datatype.uuid()
 
     expect(await questionRepo.getQuestionById(nonExistentId)).toBeFalsy()
+  })
+
+  test('should return a list of 3 questions from 2', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    await questionRepo.addQuestion(externalTestQuestion)
+
+    expect(await questionRepo.getQuestions()).toHaveLength(3)
+  })
+
+  test('should return a list of 2 questions from 2 (wrong object / empty)', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    await questionRepo.addQuestion({})
+
+    expect(await questionRepo.getQuestions()).toHaveLength(2)
   })
 })
