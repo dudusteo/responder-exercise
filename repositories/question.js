@@ -36,7 +36,12 @@ const makeQuestionRepository = fileName => {
 
     return question?.answers
   }
-  const getAnswer = async (questionId, answerId) => {}
+
+  const getAnswer = async (questionId, answerId) => {
+    const answers = await getAnswers(questionId)
+
+    return answers ? answers.find(answer => answer.id == answerId) : undefined
+  }
   const addAnswer = async (questionId, answer) => {}
 
   return {

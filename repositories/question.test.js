@@ -10,8 +10,8 @@ const testQuestions = [
     answers: [
       {
         id: faker.datatype.uuid(),
-        author: 'Deve Loper',
-        summary: 'Deve Loper'
+        author: 'Jack London',
+        summary: 'Jack London'
       }
     ]
   },
@@ -27,7 +27,13 @@ const externalTestQuestion = {
   id: faker.datatype.uuid(),
   summary: 'Why are you here?',
   author: 'Deve Loper',
-  answers: []
+  answers: [
+    {
+      id: faker.datatype.uuid(),
+      author: 'Deve Loper',
+      summary: 'Deve Loper'
+    }
+  ]
 }
 
 describe('question repository', () => {
@@ -90,7 +96,7 @@ describe('question repository', () => {
     expect(await questionRepo.getQuestions()).toHaveLength(testQuestions.length)
   })
 
-  test('should return an answer for existing id', async () => {
+  test('should return an answers for existing question id', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
     expect(await questionRepo.getAnswers(testQuestions[0].id)).toHaveLength(
@@ -105,5 +111,27 @@ describe('question repository', () => {
     // lets say that its really 100% unique otherwise, we will need to write uuid provider
 
     expect(await questionRepo.getAnswers(externalTestQuestion.id)).toBeFalsy()
+  })
+
+  test('should return an answer for existing question id and answer id', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    expect(
+      await questionRepo.getAnswer(
+        testQuestions[0].id,
+        testQuestions[0].answers[0].id
+      )
+    ).toHaveProperty('id', testQuestions[0].answers[0].id)
+  })
+
+  test('should return an undefined for non existing question id and answer id', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    expect(
+      await questionRepo.getAnswer(
+        externalTestQuestion.id,
+        externalTestQuestion.answers[0].id
+      )
+    ).toBeFalsy()
   })
 })
