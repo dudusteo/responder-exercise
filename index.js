@@ -17,18 +17,53 @@ app.get('/', (_, res) => {
 
 app.get('/questions', async (req, res) => {
   const questions = await req.repositories.questionRepo.getQuestions()
+
   res.json(questions)
 })
 
-app.get('/questions/:questionId', (req, res) => {})
+app.get('/questions/:questionId', async (req, res) => {
+  const { questionId } = req.params
 
-app.post('/questions', (req, res) => {})
+  const question = await req.repositories.questionRepo.getQuestionById(
+    questionId
+  )
 
-app.get('/questions/:questionId/answers', (req, res) => {})
+  res.json(question)
+})
 
-app.post('/questions/:questionId/answers', (req, res) => {})
+app.post('/questions', async (req, res) => {
+  const { author, summary, answers } = req.body
+  const question = { author, summary, answers: answers || [], id: null }
 
-app.get('/questions/:questionId/answers/:answerId', (req, res) => {})
+  await req.repositories.questionRepo.addQuestion(question)
+})
+
+app.get('/questions/:questionId/answers', async (req, res) => {
+  const { questionId } = req.params
+
+  const answers = await req.repositories.questionRepo.getAnswers(questionId)
+
+  res.json(answers)
+})
+
+app.post('/questions/:questionId/answers', async (req, res) => {
+  const { questionId } = req.params
+  const { author, summary } = req.body
+  const answer = { author, summary, id: null }
+
+  await req.repositories.questionRepo.addAnswer(questionId, answer)
+})
+
+app.get('/questions/:questionId/answers/:answerId', async (req, res) => {
+  const { questionId, answerId } = req.params
+
+  const answer = await req.repositories.questionRepo.getAnswer(
+    questionId,
+    answerId
+  )
+
+  res.json(answer)
+})
 
 app.listen(PORT, () => {
   console.log(`Responder app listening on port ${PORT}`)
