@@ -1,4 +1,8 @@
 const { readFile, writeFile } = require('fs/promises')
+const { v4 } = require('uuid')
+
+// there is low chance that "v4 uuid" will be colliding, but for the test
+// lets say that its really 100% unique otherwise, we will need to write uuid provider in a future to avoid
 
 const validateQuestion = question => {
   const expectedKeys = ['id', 'author', 'summary', 'answers']
@@ -27,6 +31,8 @@ const makeQuestionRepository = fileName => {
   }
 
   const addQuestion = async question => {
+    if (question.id) question.id = v4()
+
     if (validateQuestion(question)) {
       const questions = await getQuestions()
 
@@ -50,6 +56,8 @@ const makeQuestionRepository = fileName => {
   }
 
   const addAnswer = async (questionId, answer) => {
+    if (answer.id) answer.id = v4()
+
     if (!validateAnswer(answer)) return
 
     const questions = await getQuestions()
