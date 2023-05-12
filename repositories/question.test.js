@@ -2,11 +2,9 @@ const { writeFile, rm } = require('fs/promises')
 const { faker } = require('@faker-js/faker')
 const { makeQuestionRepository } = require('./question')
 
-const knownId = faker.datatype.uuid()
-
 const testQuestions = [
   {
-    id: knownId,
+    id: faker.datatype.uuid(),
     summary: 'What is my name?',
     author: 'Jack London',
     answers: []
@@ -41,5 +39,23 @@ describe('question repository', () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
     expect(await questionRepo.getQuestions()).toHaveLength(2)
+  })
+
+  test('should return a result of given id', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    expect(
+      await questionRepo.getQuestionById(testQuestions[0].id)
+    ).toHaveProperty('id', testQuestions[0].id)
+  })
+
+  test('should return an empty list', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    // there is low chance that "nonExistentId" will be colliding
+    // but for the test lets say that its really 100% unique
+    const nonExistentId = faker.datatype.uuid()
+
+    expect(await questionRepo.getQuestionById(nonExistentId)).toBeFalsy()
   })
 })
