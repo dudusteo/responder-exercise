@@ -7,7 +7,13 @@ const testQuestions = [
     id: faker.datatype.uuid(),
     summary: 'What is my name?',
     author: 'Jack London',
-    answers: []
+    answers: [
+      {
+        id: faker.datatype.uuid(),
+        author: 'Deve Loper',
+        summary: 'Deve Loper'
+      }
+    ]
   },
   {
     id: faker.datatype.uuid(),
@@ -45,7 +51,7 @@ describe('question repository', () => {
   test('should return a list of 2 questions', async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
-    expect(await questionRepo.getQuestions()).toHaveLength(2)
+    expect(await questionRepo.getQuestions()).toHaveLength(testQuestions.length)
   })
 
   test('should return a result of given id', async () => {
@@ -61,9 +67,9 @@ describe('question repository', () => {
 
     // there is low chance that "nonExistentId" will be colliding, but for the test
     // lets say that its really 100% unique otherwise, we will need to write uuid provider
-    const nonExistentId = faker.datatype.uuid()
-
-    expect(await questionRepo.getQuestionById(nonExistentId)).toBeFalsy()
+    expect(
+      await questionRepo.getQuestionById(externalTestQuestion.id)
+    ).toBeFalsy()
   })
 
   test('should return a list of 3 questions from 2', async () => {
@@ -71,7 +77,9 @@ describe('question repository', () => {
 
     await questionRepo.addQuestion(externalTestQuestion)
 
-    expect(await questionRepo.getQuestions()).toHaveLength(3)
+    expect(await questionRepo.getQuestions()).toHaveLength(
+      testQuestions.length + 1
+    )
   })
 
   test('should return a list of 2 questions from 2 (wrong object / empty)', async () => {
@@ -79,6 +87,23 @@ describe('question repository', () => {
 
     await questionRepo.addQuestion({})
 
-    expect(await questionRepo.getQuestions()).toHaveLength(2)
+    expect(await questionRepo.getQuestions()).toHaveLength(testQuestions.length)
+  })
+
+  test('should return an answer for existing id', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    expect(await questionRepo.getAnswers(testQuestions[0].id)).toHaveLength(
+      testQuestions[0].answers.length
+    )
+  })
+
+  test('should return an undefined for non existing id', async () => {
+    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+
+    // there is low chance that "nonExistentId" will be colliding, but for the test
+    // lets say that its really 100% unique otherwise, we will need to write uuid provider
+
+    expect(await questionRepo.getAnswers(externalTestQuestion.id)).toBeFalsy()
   })
 })
