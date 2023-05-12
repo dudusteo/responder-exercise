@@ -2,6 +2,23 @@ const { writeFile, rm } = require('fs/promises')
 const { faker } = require('@faker-js/faker')
 const { makeQuestionRepository } = require('./question')
 
+const knownId = faker.datatype.uuid()
+
+const testQuestions = [
+  {
+    id: knownId,
+    summary: 'What is my name?',
+    author: 'Jack London',
+    answers: []
+  },
+  {
+    id: faker.datatype.uuid(),
+    summary: 'Who are you?',
+    author: 'Tim Doods',
+    answers: []
+  }
+]
+
 describe('question repository', () => {
   const TEST_QUESTIONS_FILE_PATH = 'test-questions.json'
   let questionRepo
@@ -21,21 +38,6 @@ describe('question repository', () => {
   })
 
   test('should return a list of 2 questions', async () => {
-    const testQuestions = [
-      {
-        id: faker.datatype.uuid(),
-        summary: 'What is my name?',
-        author: 'Jack London',
-        answers: []
-      },
-      {
-        id: faker.datatype.uuid(),
-        summary: 'Who are you?',
-        author: 'Tim Doods',
-        answers: []
-      }
-    ]
-
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
 
     expect(await questionRepo.getQuestions()).toHaveLength(2)
